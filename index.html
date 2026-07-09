@@ -24,6 +24,12 @@
       max-width: 460px;
       width: 100%;
       box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .badge {
@@ -76,6 +82,12 @@
       background: #eef2ff;
       padding: 2px 10px;
       border-radius: 10px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .live-resultado.invalido {
+      background: #fee2e2;
+      color: #b91c1c;
     }
 
     .fila {
@@ -101,18 +113,32 @@
       font-weight: 400;
     }
 
-    input[type="number"] {
+    input.nota-input {
       width: 100%;
       padding: 10px 10px;
       font-size: 15px;
       border: 2px solid #e5e7eb;
       border-radius: 8px;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.15s, transform 0.15s;
+      text-align: center;
+      font-weight: 600;
+      color: #1e2761;
     }
 
-    input[type="number"]:focus {
+    input.nota-input:focus {
       border-color: #5b8def;
+    }
+
+    input.nota-input.shake {
+      border-color: #ef4444;
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
     }
 
     .externa-box {
@@ -136,11 +162,15 @@
       border-radius: 10px;
       cursor: pointer;
       margin-top: 8px;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
 
     button:hover {
       background: #141b4d;
+    }
+
+    button:active {
+      transform: scale(0.98);
     }
 
     #resultado-box {
@@ -149,6 +179,14 @@
       text-align: center;
       padding: 18px;
       border-radius: 12px;
+      opacity: 0;
+      transform: translateY(12px) scale(0.96);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    #resultado-box.mostrar {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     #resultado-box.aprobado {
@@ -159,6 +197,20 @@
     #resultado-box.desaprobado {
       background: #fef2f2;
       border: 2px solid #ef4444;
+    }
+
+    .emoji {
+      display: block;
+      font-size: 46px;
+      line-height: 1;
+      margin-bottom: 8px;
+      animation: popIn 0.5s ease;
+    }
+
+    @keyframes popIn {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.25); opacity: 1; }
+      100% { transform: scale(1); }
     }
 
     #promo-label {
@@ -180,12 +232,52 @@
     #resultado-box.aprobado #promo-valor { color: #065f46; }
     #resultado-box.desaprobado #promo-valor { color: #7f1d1d; }
 
+    #estado-texto {
+      margin-top: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    #resultado-box.aprobado #estado-texto { color: #059669; }
+    #resultado-box.desaprobado #estado-texto { color: #dc2626; }
+
     .footer {
       margin-top: 20px;
       font-size: 11px;
       color: #9ca3af;
       text-align: center;
     }
+
+    /* Snackbar */
+    .snackbar {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2937;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      z-index: 1000;
+      max-width: 90%;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .snackbar.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .snackbar.error { background: #dc2626; }
+    .snackbar.info  { background: #1e2761; }
   </style>
 </head>
 <body>
@@ -196,20 +288,20 @@
     <div class="grupo">
       <div class="grupo-header">
         <span class="grupo-titulo">Proceso 1</span>
-        <span class="live-resultado">EP1: <span id="ep1-live">0.00</span></span>
+        <span class="live-resultado" id="ep1-box">EP1: <span id="ep1-live">0.00</span></span>
       </div>
       <div class="fila">
         <div class="campo">
           <label>Sub 1 <span class="peso">(30%)</span></label>
-          <input type="number" id="s1" placeholder="0-20" oninput="actualizarEP1()">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="s1" placeholder="0-20" oninput="manejarEntrada(this, actualizarEP1)">
         </div>
         <div class="campo">
           <label>Sub 2 <span class="peso">(30%)</span></label>
-          <input type="number" id="s2" placeholder="0-20" oninput="actualizarEP1()">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="s2" placeholder="0-20" oninput="manejarEntrada(this, actualizarEP1)">
         </div>
         <div class="campo">
           <label>Sub 3 <span class="peso">(40%)</span></label>
-          <input type="number" id="s3" placeholder="0-20" oninput="actualizarEP1()">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="s3" placeholder="0-20" oninput="manejarEntrada(this, actualizarEP1)">
         </div>
       </div>
     </div>
@@ -217,20 +309,20 @@
     <div class="grupo">
       <div class="grupo-header">
         <span class="grupo-titulo">Proceso 2</span>
-        <span class="live-resultado">EP2: <span id="ep2-live">0.00</span></span>
+        <span class="live-resultado" id="ep2-box">EP2: <span id="ep2-live">0.00</span></span>
       </div>
       <div class="fila">
         <div class="campo">
           <label>Sub 4 <span class="peso">(30%)</span></label>
-          <input type="number" id="s4" placeholder="0-20" oninput="actualizarEP2()">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="s4" placeholder="0-20" oninput="manejarEntrada(this, actualizarEP2)">
         </div>
         <div class="campo">
           <label>Sub 5 <span class="peso">(30%)</span></label>
-          <input type="number" id="s5" placeholder="0-20" oninput="actualizarEP2()">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="s5" placeholder="0-20" oninput="manejarEntrada(this, actualizarEP2)">
         </div>
         <div class="campo">
           <label>Sub 6 <span class="peso">(40%)</span></label>
-          <input type="number" id="s6" placeholder="0-20" oninput="actualizarEP2()">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="s6" placeholder="0-20" oninput="manejarEntrada(this, actualizarEP2)">
         </div>
       </div>
     </div>
@@ -242,11 +334,11 @@
       <div class="fila">
         <div class="campo">
           <label>Ev. parcial <span class="peso">(EVP)</span></label>
-          <input type="number" id="evp" placeholder="0-20">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="evp" placeholder="0-20" oninput="manejarEntrada(this)">
         </div>
         <div class="campo">
           <label>Ev. final <span class="peso">(EVF)</span></label>
-          <input type="number" id="evf" placeholder="0-20">
+          <input class="nota-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="evf" placeholder="0-20" oninput="manejarEntrada(this)">
         </div>
       </div>
     </div>
@@ -254,72 +346,124 @@
     <button onclick="calcular()">Calcular nota</button>
 
     <div id="resultado-box">
+      <span class="emoji" id="emoji"></span>
       <div id="promo-label">Nota final</div>
       <div id="promo-valor"></div>
+      <div id="estado-texto"></div>
     </div>
 
     <p class="footer">Desplegado automáticamente vía GitHub Actions</p>
   </div>
 
   <script>
+    // ---------- Snackbar (reemplaza los alert()) ----------
+    function mostrarSnackbar(mensaje, tipo = 'error') {
+      const anterior = document.getElementById('snackbar');
+      if (anterior) anterior.remove();
+
+      const snack = document.createElement('div');
+      snack.id = 'snackbar';
+      snack.className = 'snackbar ' + tipo;
+      snack.textContent = mensaje;
+      document.body.appendChild(snack);
+
+      requestAnimationFrame(() => snack.classList.add('show'));
+      setTimeout(() => {
+        snack.classList.remove('show');
+        setTimeout(() => snack.remove(), 300);
+      }, 2800);
+    }
+
+    // ---------- Restricción de inputs: solo números 0-20 (máx. 2 dígitos) ----------
+    function manejarEntrada(input, callback) {
+      const original = input.value;
+      // solo dígitos, máximo 2 caracteres
+      let limpio = original.replace(/[^0-9]/g, '').slice(0, 2);
+
+      if (limpio !== '') {
+        const num = parseInt(limpio, 10);
+        if (num > 20) limpio = '20';
+      }
+
+      if (limpio !== original) {
+        input.value = limpio;
+        if (original !== '') {
+          input.classList.add('shake');
+          setTimeout(() => input.classList.remove('shake'), 350);
+          mostrarSnackbar('Solo se permiten números entre 0 y 20', 'error');
+        }
+      }
+
+      if (typeof callback === 'function') callback();
+    }
+
+    // ---------- Cálculos ----------
     function calcularEP(a, b, c) {
       return (a * 0.30) + (b * 0.30) + (c * 0.40);
     }
 
-    function esValido(valor) {
-      return valor >= 0 && valor <= 20;
+    function leerValor(id) {
+      const raw = document.getElementById(id).value;
+      return raw === '' ? null : parseInt(raw, 10);
     }
 
     function actualizarEP1() {
-      const s1 = parseFloat(document.getElementById("s1").value);
-      const s2 = parseFloat(document.getElementById("s2").value);
-      const s3 = parseFloat(document.getElementById("s3").value);
-      const valores = [s1, s2, s3].map(v => isNaN(v) ? 0 : v);
-
-      if (valores.some(v => v < 0 || v > 20)) {
-        document.getElementById("ep1-live").textContent = "inválido";
+      const valores = [leerValor('s1'), leerValor('s2'), leerValor('s3')];
+      const box = document.getElementById('ep1-box');
+      if (valores.some(v => v === null)) {
+        document.getElementById('ep1-live').textContent = '0.00';
+        box.classList.remove('invalido');
         return;
       }
-      document.getElementById("ep1-live").textContent = calcularEP(...valores).toFixed(2);
+      box.classList.remove('invalido');
+      document.getElementById('ep1-live').textContent = calcularEP(...valores).toFixed(2);
     }
 
     function actualizarEP2() {
-      const s4 = parseFloat(document.getElementById("s4").value);
-      const s5 = parseFloat(document.getElementById("s5").value);
-      const s6 = parseFloat(document.getElementById("s6").value);
-      const valores = [s4, s5, s6].map(v => isNaN(v) ? 0 : v);
-
-      if (valores.some(v => v < 0 || v > 20)) {
-        document.getElementById("ep2-live").textContent = "inválido";
+      const valores = [leerValor('s4'), leerValor('s5'), leerValor('s6')];
+      const box = document.getElementById('ep2-box');
+      if (valores.some(v => v === null)) {
+        document.getElementById('ep2-live').textContent = '0.00';
+        box.classList.remove('invalido');
         return;
       }
-      document.getElementById("ep2-live").textContent = calcularEP(...valores).toFixed(2);
+      box.classList.remove('invalido');
+      document.getElementById('ep2-live').textContent = calcularEP(...valores).toFixed(2);
     }
 
     function calcular() {
-      const s1 = parseFloat(document.getElementById("s1").value) || 0;
-      const s2 = parseFloat(document.getElementById("s2").value) || 0;
-      const s3 = parseFloat(document.getElementById("s3").value) || 0;
-      const s4 = parseFloat(document.getElementById("s4").value) || 0;
-      const s5 = parseFloat(document.getElementById("s5").value) || 0;
-      const s6 = parseFloat(document.getElementById("s6").value) || 0;
-      const evp = parseFloat(document.getElementById("evp").value) || 0;
-      const evf = parseFloat(document.getElementById("evf").value) || 0;
+      const campos = ['s1', 's2', 's3', 's4', 's5', 's6', 'evp', 'evf'];
+      const valores = {};
 
-      const valores = [s1, s2, s3, s4, s5, s6, evp, evf];
-      if (valores.some(v => v < 0 || v > 20)) {
-        alert("Las notas deben estar entre 0 y 20");
-        return;
+      for (const id of campos) {
+        const val = leerValor(id);
+        if (val === null) {
+          mostrarSnackbar('Completa todos los campos antes de calcular', 'error');
+          document.getElementById(id).classList.add('shake');
+          setTimeout(() => document.getElementById(id).classList.remove('shake'), 350);
+          return;
+        }
+        valores[id] = val;
       }
 
-      const ep1 = calcularEP(s1, s2, s3);
-      const ep2 = calcularEP(s4, s5, s6);
-      const promo = Math.round(((0.20 * ep1) + (0.30 * evp) + (0.20 * ep2) + (0.30 * evf)) * 100) / 100;
+      const ep1 = calcularEP(valores.s1, valores.s2, valores.s3);
+      const ep2 = calcularEP(valores.s4, valores.s5, valores.s6);
+      const promo = Math.round(((0.20 * ep1) + (0.30 * valores.evp) + (0.20 * ep2) + (0.30 * valores.evf)) * 100) / 100;
 
-      const box = document.getElementById("resultado-box");
-      document.getElementById("promo-valor").textContent = promo.toFixed(2);
-      box.className = promo >= 10.5 ? "aprobado" : "desaprobado";
-      box.style.display = "block";
+      const aprobado = promo > 10;
+      const box = document.getElementById('resultado-box');
+
+      document.getElementById('promo-valor').textContent = promo.toFixed(2);
+      document.getElementById('emoji').textContent = aprobado ? '😄' : '😢';
+      document.getElementById('estado-texto').textContent = aprobado ? 'Aprobado' : 'Desaprobado';
+
+      // reinicia la animación de entrada
+      box.classList.remove('mostrar');
+      box.className = aprobado ? 'aprobado' : 'desaprobado';
+      box.style.display = 'block';
+      requestAnimationFrame(() => box.classList.add('mostrar'));
+
+      mostrarSnackbar(aprobado ? '¡Cálculo listo, aprobado! 🎉' : 'Cálculo listo', 'info');
     }
   </script>
 </body>
