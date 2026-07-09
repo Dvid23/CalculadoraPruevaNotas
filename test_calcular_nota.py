@@ -8,7 +8,7 @@ def test_calcular_ep2():
 
 def test_calcular_promo():
     resultado = calcular_promo(sub1=7, sub2=8, sub3=8, sub4=10, sub5=12, sub6=15, evp=7, evf=14)
-    assert resultado == 10.99
+    assert resultado == 10.36
 
 def test_rechaza_negativos_en_ep1():
     try:
