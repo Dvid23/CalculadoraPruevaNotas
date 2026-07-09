@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Notas - Agile Development</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f1c3f 0%, #1e2761 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 36px 32px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+
+    .badge {
+      display: inline-block;
+      background: #eef2ff;
+      color: #1e2761;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 22px;
+      color: #1e2761;
+      margin-bottom: 24px;
+    }
+
+    .grupo {
+      margin-bottom: 18px;
+    }
+
+    .grupo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #eef2ff;
+    }
+
+    .grupo-titulo {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e2761;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grupo-titulo.externa {
+      color: #7c5e10;
+    }
+
+    .live-resultado {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e2761;
+      background: #eef2ff;
+      padding: 2px 10px;
+      border-radius: 10px;
+    }
+
+    .fila {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .campo {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+
+    .peso {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 10px;
+      font-size: 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="number"]:focus {
+      border-color: #5b8def;
+    }
+
+    .externa-box {
+      background: #fffbeb;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .externa-box .grupo-header {
+      border-bottom-color: #fef3c7;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: #1e2761;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #141b4d;
+    }
+
+    #resultado-box {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      padding: 18px;
+      border-radius: 12px;
+    }
+
+    #resultado-box.aprobado {
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+    }
+
+    #resultado-box.desaprobado {
+      background: #fef2f2;
+      border: 2px solid #ef4444;
+    }
+
+    #promo-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    #resultado-box.aprobado #promo-label { color: #059669; }
+    #resultado-box.desaprobado #promo-label { color: #dc2626; }
+
+    #promo-valor {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    #resultado-box.aprobado #promo-valor { color: #065f46; }
+    #resultado-box.desaprobado #promo-valor { color: #7f1d1d; }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">DEVOPS · CI/CD</span>
+    <h1>Calculadora de notas</h1>
+
+    <div class="grupo">
+      <div class="grupo-header">
+        <span class="grupo-titulo">Proceso 1</span>
+        <span class="live-resultado">EP1: <span id="ep1-live">0.00</span></span>
+      </div>
+      <div class="fila">
+        <div class="campo">
+          <label>Sub 1 <span class="peso">(30%)</span></label>
+          <input type="number" id="s1" placeholder="0-20" oninput="actualizarEP1()">
+        </div>
+        <div class="campo">
+          <label>Sub 2 <span class="peso">(30%)</span></label>
+          <input type="number" id="s2" placeholder="0-20" oninput="actualizarEP1()">
+        </div>
+        <div class="campo">
+          <label>Sub 3 <span class="peso">(40%)</span></label>
+          <input type="number" id="s3" placeholder="0-20" oninput="actualizarEP1()">
+        </div>
+      </div>
+    </div>
+
+    <div class="grupo">
+      <div class="grupo-header">
+        <span class="grupo-titulo">Proceso 2</span>
+        <span class="live-resultado">EP2: <span id="ep2-live">0.00</span></span>
+      </div>
+      <div class="fila">
+        <div class="campo">
+          <label>Sub 4 <span class="peso">(30%)</span></label>
+          <input type="number" id="s4" placeholder="0-20" oninput="actualizarEP2()">
+        </div>
+        <div class="campo">
+          <label>Sub 5 <span class="peso">(30%)</span></label>
+          <input type="number" id="s5" placeholder="0-20" oninput="actualizarEP2()">
+        </div>
+        <div class="campo">
+          <label>Sub 6 <span class="peso">(40%)</span></label>
+          <input type="number" id="s6" placeholder="0-20" oninput="actualizarEP2()">
+        </div>
+      </div>
+    </div>
+
+    <div class="grupo externa-box">
+      <div class="grupo-header">
+        <span class="grupo-titulo externa">Evaluaciones externas</span>
+      </div>
+      <div class="fila">
+        <div class="campo">
+          <label>Ev. parcial <span class="peso">(EVP)</span></label>
+          <input type="number" id="evp" placeholder="0-20">
+        </div>
+        <div class="campo">
+          <label>Ev. final <span class="peso">(EVF)</span></label>
+          <input type="number" id="evf" placeholder="0-20">
+        </div>
+      </div>
+    </div>
+
+    <button onclick="calcular()">Calcular nota</button>
+
+    <div id="resultado-box">
+      <div id="promo-label">Nota final</div>
+      <div id="promo-valor"></div>
+    </div>
+
+    <p class="footer">Desplegado automáticamente vía GitHub Actions</p>
+  </div>
+
+  <script>
+    function calcularEP(a, b, c) {
+      return (a * 0.30) + (b * 0.30) + (c * 0.40);
+    }
+
+    function esValido(valor) {
+      return valor >= 0 && valor <= 20;
+    }
+
+    function actualizarEP1() {
+      const s1 = parseFloat(document.getElementById("s1").value);
+      const s2 = parseFloat(document.getElementById("s2").value);
+      const s3 = parseFloat(document.getElementById("s3").value);
+      const valores = [s1, s2, s3].map(v => isNaN(v) ? 0 : v);
+
+      if (valores.some(v => v < 0 || v > 20)) {
+        document.getElementById("ep1-live").textContent = "inválido";
+        return;
+      }
+      document.getElementById("ep1-live").textContent = calcularEP(...valores).toFixed(2);
+    }
+
+    function actualizarEP2() {
+      const s4 = parseFloat(document.getElementById("s4").value);
+      const s5 = parseFloat(document.getElementById("s5").value);
+      const s6 = parseFloat(document.getElementById("s6").value);
+      const valores = [s4, s5, s6].map(v => isNaN(v) ? 0 : v);
+
+      if (valores.some(v => v < 0 || v > 20)) {
+        document.getElementById("ep2-live").textContent = "inválido";
+        return;
+      }
+      document.getElementById("ep2-live").textContent = calcularEP(...valores).toFixed(2);
+    }
+
+    function calcular() {
+      const s1 = parseFloat(document.getElementById("s1").value) || 0;
+      const s2 = parseFloat(document.getElementById("s2").value) || 0;
+      const s3 = parseFloat(document.getElementById("s3").value) || 0;
+      const s4 = parseFloat(document.getElementById("s4").value) || 0;
+      const s5 = parseFloat(document.getElementById("s5").value) || 0;
+      const s6 = parseFloat(document.getElementById("s6").value) || 0;
+      const evp = parseFloat(document.getElementById("evp").value) || 0;
+      const evf = parseFloat(document.getElementById("evf").value) || 0;
+
+      const valores = [s1, s2, s3, s4, s5, s6, evp, evf];
+      if (valores.some(v => v < 0 || v > 20)) {
+        alert("Las notas deben estar entre 0 y 20");
+        return;
+      }
+
+      const ep1 = calcularEP(s1, s2, s3);
+      const ep2 = calcularEP(s4, s5, s6);
+      const promo = Math.round(((0.20 * ep1) + (0.30 * evp) + (0.20 * ep2) + (0.30 * evf)) * 100) / 100;
+
+      const box = document.getElementById("resultado-box");
+      document.getElementById("promo-valor").textContent = promo.toFixed(2);
+      box.className = promo >= 10.5 ? "aprobado" : "desaprobado";
+      box.style.display = "block";
+    }
+  </script>
+</body>
+</html>
